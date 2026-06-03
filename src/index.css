@@ -1,0 +1,293 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 7%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 28 100% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 28 100% 45%;
+    --primary-glow: 28 100% 65%;
+
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 38 92% 55%;
+    --accent-foreground: 0 0% 12%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 28 100% 55%;
+
+    --radius: 0.75rem;
+
+    --gradient-hero: linear-gradient(135deg, hsl(28 100% 55%) 0%, hsl(15 85% 55%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 12%) 0%, hsl(0 0% 9%) 100%);
+    --shadow-card: 0 2px 12px -2px hsl(0 0% 0% / 0.5);
+    --shadow-card-hover: 0 12px 28px -8px hsl(28 100% 55% / 0.18);
+    --shadow-glow: 0 0 40px hsl(28 100% 65% / 0.35);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Premium Ultra-Clean Glassmorphism (Apple Style) */
+  .apple-glass {
+    @apply relative overflow-hidden backdrop-blur-2xl transition-all duration-500 ease-out;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.15); /* Top light catch */
+    box-shadow: 
+      0 4px 24px -1px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .apple-glass:hover {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%);
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 
+      0 12px 32px -4px rgba(0, 0, 0, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  /* Glass Button Effect */
+  .btn-glass {
+    @apply apple-glass text-white;
+  }
+
+  /* Primary Accent Glass */
+  .btn-glass-primary {
+    @apply relative overflow-hidden backdrop-blur-2xl transition-all duration-500 ease-out text-primary;
+    background: linear-gradient(180deg, rgba(255, 110, 0, 0.15) 0%, rgba(255, 110, 0, 0.05) 100%);
+    border: 1px solid rgba(255, 110, 0, 0.2);
+    border-top: 1px solid rgba(255, 110, 0, 0.35); /* Top light catch */
+    box-shadow: 
+      0 4px 24px -1px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 110, 0, 0.25);
+  }
+
+  .btn-glass-primary:hover {
+    background: linear-gradient(180deg, rgba(255, 110, 0, 0.25) 0%, rgba(255, 110, 0, 0.1) 100%);
+    border-top: 1px solid rgba(255, 110, 0, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 
+      0 12px 32px -4px rgba(255, 110, 0, 0.3),
+      inset 0 1px 0 rgba(255, 110, 0, 0.4);
+  }
+
+  /* Refined, Premium Shine Animation */
+  @keyframes premiumShine {
+    0% { transform: translateX(-200%) skewX(-30deg); }
+    100% { transform: translateX(200%) skewX(-30deg); }
+  }
+
+  .animate-shine {
+    &::after {
+      content: '';
+      @apply absolute top-0 -left-[100%] w-[100%] h-full pointer-events-none;
+      background: linear-gradient(
+        to right, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.05) 45%, 
+        rgba(255, 255, 255, 0.3) 50%, 
+        rgba(255, 255, 255, 0.05) 55%, 
+        transparent 100%
+      );
+      animation: premiumShine 3s ease-in-out infinite;
+    }
+  }
+  /* Dynamic Entrance Animations */
+  @keyframes slideUpFade {
+    from { opacity: 0; transform: translateY(60px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes heroEntrance {
+    from { 
+      opacity: 0; 
+      transform: scale(0.8) translateY(40px) rotate(-5deg); 
+      filter: blur(20px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: scale(1) translateY(0) rotate(0deg); 
+      filter: blur(0); 
+    }
+  }
+
+  @keyframes floatDynamic {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-15px) rotate(2deg); }
+    75% { transform: translateY(15px) rotate(-2deg); }
+  }
+
+  @keyframes floatDynamicReverse {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(25px) scale(1.05); }
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.1); }
+  }
+
+  .animate-slide-up {
+    animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-hero-entrance {
+    animation: heroEntrance 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+
+  .animate-float-dynamic {
+    animation: floatDynamic 8s ease-in-out infinite;
+  }
+
+  .animate-float-reverse-dynamic {
+    animation: floatDynamicReverse 6s ease-in-out infinite;
+  }
+  
+  .animate-pulse-glow {
+    animation: pulseGlow 4s ease-in-out infinite;
+  }
+
+  /* Scrollbar Enterprise Customizada */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(28 100% 55%);
+  }
+
+  /* Glass Header */
+  .glass-header {
+    @apply sticky top-0 z-50 backdrop-blur-xl bg-black/60 border-b border-white/5;
+  }
+
+  /* Reveal Animation */
+  .reveal {
+    animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Safe-area padding (notch / home-bar no mobile) */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Hide scrollbar mantendo o scroll funcional */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Touch targets mínimos de 44px para Android/iOS */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Estilos para Impressão Térmica (Nota Fiscal/Recibo) */
+@media print {
+  /* Esconde tudo */
+  body * {
+    visibility: hidden !important;
+  }
+  /* Mostra apenas o container de impressão */
+  #print-receipt, #print-receipt * {
+    visibility: visible !important;
+  }
+  #print-receipt {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 72mm !important; /* Ajustado para margens internas de impressoras de 80mm */
+    padding: 2mm !important;
+    margin: 0 !important;
+    background: white !important;
+    color: black !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+  }
+  /* Garante que o fundo seja branco e texto preto */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  /* Remove margens padrão do navegador (data, título, url) */
+  @page {
+    margin: 0;
+    size: auto;
+  }
+}
+
+/* Typing Indicator Animation */
+@keyframes typing-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-4px); opacity: 1; }
+}
+
+.typing-dot {
+  width: 4px;
+  height: 4px;
+  background: currentColor;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 0 1px;
+  animation: typing-bounce 1.4s infinite ease-in-out both;
+}
+
+.typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s; }
