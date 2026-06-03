@@ -1,4 +1,4 @@
-import { Minus, Plus, ShoppingBag, Trash2, User, Phone, MapPin, Store, ChevronLeft, Navigation, QrCode, CreditCard, Banknote, Copy, CheckCircle2 } from "lucide-react";
+import { Minus, Plus, ShoppingBag, Trash2, User, Phone, MapPin, Store, ChevronLeft, Navigation, QrCode, CreditCard, Banknote, Copy, CheckCircle2, Gift } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -31,6 +31,9 @@ export const CartSheet = () => {
   const [pixCopiaCola, setPixCopiaCola] = useState<string | null>(null);
   const [isGeneratingPix, setIsGeneratingPix] = useState(false);
   const [pixOrderId, setPixOrderId] = useState<string | null>(null);
+
+  const [showCrustReminder, setShowCrustReminder] = useState(false);
+  const isFreeCrustDay = new Date().getDay() === 1; // 1 = Segunda-feira
 
   const finalTotal = items.length > 0 ? totalPrice + (deliveryType === "DELIVERY" ? DELIVERY_FEE : 0) : 0;
 
@@ -146,6 +149,11 @@ export const CartSheet = () => {
   };
 
   const handleInitialCheckout = () => {
+    if (isFreeCrustDay && !showCrustReminder) {
+      setShowCrustReminder(true);
+      return;
+    }
+
     if (!name || !phone) {
       setStep("PROFILE");
     } else {
@@ -275,7 +283,33 @@ export const CartSheet = () => {
           </SheetDescription>
         </SheetHeader>
 
-        {step === "PROFILE" ? (
+        {showCrustReminder ? (
+          <div className="flex flex-1 flex-col p-6 animate-fade-in items-center justify-center text-center">
+            <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+              <Gift className="h-8 w-8 text-primary" />
+            </div>
+            <h3 className="text-2xl font-black mb-2">Psiu! Tem Borda Grátis Hoje!</h3>
+            <p className="text-sm text-muted-foreground mb-6">
+              Hoje é segunda-feira, dia de borda grátis! Se você ainda não adicionou, volte ao cardápio e escolha a sua borda recheada antes de finalizar o pedido.
+            </p>
+
+            <div className="flex flex-col gap-3 w-full mt-auto pt-6">
+              <Button onClick={() => {
+                setShowCrustReminder(false);
+                setIsOpen(false);
+              }} size="lg" className="w-full rounded-full btn-glass-primary font-bold shadow-xl shadow-primary/20">
+                Adicionar Borda
+              </Button>
+              <Button onClick={() => {
+                setShowCrustReminder(false);
+                if (!name || !phone) setStep("PROFILE");
+                else setStep("DELIVERY");
+              }} size="lg" variant="ghost" className="w-full rounded-full font-bold">
+                Continuar sem adicionar / Já adicionei
+              </Button>
+            </div>
+          </div>
+        ) : step === "PROFILE" ? (
           <div className="flex flex-1 flex-col p-6 animate-fade-in overflow-y-auto">
             <h3 className="text-xl font-bold mb-2">Quase lá!</h3>
             <p className="text-sm text-muted-foreground mb-6">
