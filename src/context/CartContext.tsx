@@ -19,7 +19,7 @@ interface CartContextValue {
   items: CartItem[];
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
-  addItem: (product: Product, size: Size, qty?: number, notes?: string, extras?: { name: string; price: number }[]) => void;
+  addItem: (product: Product, size: Size, qty?: number, notes?: string, extras?: { name: string; price: number }[], customPrice?: number) => void;
   removeItem: (key: string) => void;
   updateQty: (key: string, qty: number) => void;
   clear: () => void;
@@ -37,7 +37,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const priceForSize = (product: Product, size: Size) =>
     Math.round(product.price * SIZE_MULTIPLIER[size] * 100) / 100;
 
-  const addItem: CartContextValue["addItem"] = (product, size, qty = 1, notes = "", extras = []) => {
+  const addItem: CartContextValue["addItem"] = (product, size, qty = 1, notes = "", extras = [], customPrice) => {
     setItems((prev) => {
       const extrasId = extras.map(e => e.name).sort().join(",");
       const key = `${product.id}-${size}-${extrasId}`;
@@ -57,7 +57,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           product, 
           size, 
           quantity: qty, 
-          unitPrice: priceForSize(product, size) + extrasTotal, 
+          unitPrice: (customPrice !== undefined ? customPrice : priceForSize(product, size)) + extrasTotal, 
           notes,
           extras 
         },

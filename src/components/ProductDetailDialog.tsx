@@ -48,6 +48,8 @@ export const ProductDetailDialog = ({ product, open, onOpenChange, dbProducts }:
   const [qty, setQty] = useState(1);
   const [notes, setNotes] = useState("");
   const [promoSelections, setPromoSelections] = useState<string[]>([]);
+  const [isHalf, setIsHalf] = useState(false);
+  const [secondFlavor, setSecondFlavor] = useState("");
 
   useEffect(() => {
     if (open) {
@@ -60,12 +62,20 @@ export const ProductDetailDialog = ({ product, open, onOpenChange, dbProducts }:
       } else {
         setPromoSelections([]);
       }
+      setIsHalf(false);
+      setSecondFlavor("");
     }
   }, [open, product?.id]);
 
   if (!product) return null;
 
-  const unit = priceForSize(product, size);
+  const isPizza = ["classicos", "artesanais", "premium"].includes(product.category);
+
+  let unit = priceForSize(product, size);
+  if (isPizza && isHalf) {
+    const hasCamarao = product.name.toLowerCase().includes("camarão") || product.name.toLowerCase().includes("camarao") || secondFlavor.toLowerCase().includes("camarão") || secondFlavor.toLowerCase().includes("camarao");
+    unit = hasCamarao ? 30 : 25;
+  }
   const total = unit * qty;
 
   const handleAdd = () => {
@@ -77,13 +87,19 @@ export const ProductDetailDialog = ({ product, open, onOpenChange, dbProducts }:
     }
 
     let finalNotes = notes;
+    let customPrice: number | undefined = undefined;
+    
     if (product.category === "promocao") {
       const rules = PROMO_RULES[product.name] || PROMO_RULES['DEFAULT'];
       const flavorsText = promoSelections.map((s, idx) => `${idx + 1}. ${s} (${rules[idx].label})`).join("\n");
       finalNotes = `Sabores escolhidos:\n${flavorsText}\n${notes ? '\nObs: ' + notes : ''}`.trim();
+    } else if (isPizza && isHalf) {
+      if (!secondFlavor) return toast.error("Selecione o segundo sabor!");
+      finalNotes = `METADE 1: ${product.name}\nMETADE 2: ${secondFlavor}${notes ? '\n\nObs: ' + notes : ''}`.trim();
+      customPrice = unit;
     }
 
-    addItem(product, size, qty, finalNotes);
+    addItem(product, size, qty, finalNotes, [], customPrice);
     onOpenChange(false);
     toast.success(`${product.name} adicionado!`, {
       description: `${qty}x ${SIZES.find(s => s.value === size)?.label} · ${formatBRL(total)}`,
@@ -161,6 +177,32 @@ export const ProductDetailDialog = ({ product, open, onOpenChange, dbProducts }:
                       </div>
                     );
                   })}
+                </div>
+              ) : isPizza ? (
+                <div className="space-y-4">
+                  <label className="flex items-center gap-3 p-4 border border-white/10 rounded-2xl cursor-pointer bg-white/5 hover:bg-white/10 transition-colors">
+                    <input type="checkbox" checked={isHalf} onChange={e => setIsHalf(e.target.checked)} className="w-5 h-5 accent-primary shrink-0" />
+                    <div>
+                      <div className="font-bold">Dividir em 2 Sabores (Meio a Meio)</div>
+                      <div className="text-xs text-muted-foreground mt-1">Valor fixo de R$ 25,00 (ou R$ 30,00 se um dos sabores for Camarão)</div>
+                    </div>
+                  </label>
+                  
+                  {isHalf && (
+                    <div className="space-y-2 animate-fade-in">
+                      <label className="text-xs font-bold text-white/50 uppercase tracking-wider">Selecione a 2ª Metade</label>
+                      <select 
+                        value={secondFlavor} 
+                        onChange={e => setSecondFlavor(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm font-bold text-white focus:outline-none focus:border-primary/50 transition-all uppercase"
+                      >
+                        <option value="">-- Selecione o sabor --</option>
+                        {availableFlavors.filter(f => ["classicos", "artesanais", "premium"].includes(f.category) && f.id !== product.id).map(f => (
+                          <option key={`half-${f.id}`} value={f.name}>{f.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <>
