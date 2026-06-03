@@ -87,7 +87,7 @@ const MenuSection = ({
         />
       </div>
       <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-0.5">
-        {["todos", ...categories.filter(c => c.id !== "adicionais").map(c => c.id)].map(id => (
+        {["todos", ...categories.filter(c => c.id !== "adicionais" && (c.id !== "rodizio" || [5, 6].includes(new Date().getDay()))).map(c => c.id)].map(id => (
           <button
             key={id}
             onClick={() => setCat(id)}
@@ -114,7 +114,7 @@ const MenuSection = ({
         </div>
       ) : activeCat === "todos" && !search ? (
         <div className="space-y-6 pb-6">
-          {categories.filter(c => c.id !== "adicionais").map(cat => {
+          {categories.filter(c => c.id !== "adicionais" && (c.id !== "rodizio" || [5, 6].includes(new Date().getDay()))).map(cat => {
             const groupProducts = filtered.filter(p => p.category === cat.id);
             if (groupProducts.length === 0) return null;
             return (

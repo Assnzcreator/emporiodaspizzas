@@ -133,8 +133,8 @@ const Storefront = () => {
   const grouped = useMemo(() => {
     if (activeCat !== "todos") return [{ cat: activeCat, items: filtered }];
     return categories
+      .filter((c) => c.id !== "adicionais" && c.id !== "rodizio")
       .map((c) => ({ cat: c.id, items: filtered.filter((b) => b.category === c.id) }))
-      .filter((g) => g.items.length > 0);
   }, [filtered, activeCat]);
 
   const openDetail = (b: Product) => {

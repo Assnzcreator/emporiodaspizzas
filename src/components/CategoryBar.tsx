@@ -8,7 +8,7 @@ interface Props {
 }
 
 export const CategoryBar = ({ active, onChange, showPedidos }: Props) => {
-  const all: any[] = [{ id: "todos" as const, label: "Todos", emoji: "🍕" }, ...categories.filter(c => c.id !== "adicionais")];
+  const all: any[] = [{ id: "todos" as const, label: "Todos", emoji: "🍕" }, ...categories.filter(c => c.id !== "adicionais" && c.id !== "rodizio")];
   if (showPedidos) {
     all.push({ id: "pedidos" as const, label: "Meus Pedidos", emoji: "📜" });
   }
