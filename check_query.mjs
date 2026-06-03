@@ -8,16 +8,11 @@ const envs = Object.fromEntries(
 
 const supabaseUrl = envs.VITE_SUPABASE_URL
 const supabaseKey = envs.VITE_SUPABASE_ANON_KEY
-
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 async function check() {
-  const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("available", true);
-  console.log("Error:", error)
-  console.log("Data length:", data ? data.length : 0)
+  const { data, error } = await supabase.from("products").select("category");
+  console.log("Categories:", [...new Set(data.map(d => d.category))])
 }
 
 check()

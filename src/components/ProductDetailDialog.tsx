@@ -3,7 +3,8 @@ import { Minus, Plus, X } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useCart, formatBRL, type Size } from "@/context/CartContext";
+import { useCart, formatBRL, type Size, CartContext } from "@/context/CartContext";
+import { useContext } from "react";
 import type { Product } from "@/data/products";
 import { toast } from "sonner";
 
@@ -34,6 +35,7 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   dbProducts?: Product[];
+  customOnAdd?: (product: Product, size: Size, qty: number, notes: string, extras: any[], customPrice?: number) => void;
 }
 
 const SIZES: { value: Size; label: string; sub: string }[] = [
@@ -42,8 +44,16 @@ const SIZES: { value: Size; label: string; sub: string }[] = [
   { value: "G", label: "Premium", sub: "+ Batata G e Milkshake" },
 ];
 
-export const ProductDetailDialog = ({ product, open, onOpenChange, dbProducts }: Props) => {
-  const { addItem, priceForSize } = useCart();
+export const ProductDetailDialog = ({ product, open, onOpenChange, dbProducts, customOnAdd }: Props) => {
+  const ctx = useContext(CartContext);
+  
+  // Usar priceForSize do contexto ou um fallback se não estiver num provider
+  const priceForSize = (p: Product, s: Size) => {
+    if (ctx) return ctx.priceForSize(p, s);
+    const mult = { P: 0.8, M: 1, G: 1.25 };
+    return Math.round(p.price * mult[s] * 100) / 100;
+  };
+
   const [size, setSize] = useState<Size>("M");
   const [qty, setQty] = useState(1);
   const [notes, setNotes] = useState("");
@@ -99,7 +109,11 @@ export const ProductDetailDialog = ({ product, open, onOpenChange, dbProducts }:
       customPrice = unit;
     }
 
-    addItem(product, size, qty, finalNotes, [], customPrice);
+    if (customOnAdd) {
+      customOnAdd(product, size, qty, finalNotes, [], customPrice);
+    } else if (ctx) {
+      ctx.addItem(product, size, qty, finalNotes, [], customPrice);
+    }
     onOpenChange(false);
     toast.success(`${product.name} adicionado!`, {
       description: `${qty}x ${SIZES.find(s => s.value === size)?.label} · ${formatBRL(total)}`,

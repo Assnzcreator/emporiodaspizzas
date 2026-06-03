@@ -12,8 +12,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { encodeOrderForPrinter } from "@/lib/printer";
+import { ProductDetailDialog } from "@/components/ProductDetailDialog";
 
-/* �������������������������������������� tipos �������������������������������������� */
+/*                     tipos                     */
 interface BalcaoExtra { name: string; price: number; }
 interface BalcaoItem { 
   product: Product; 
@@ -51,7 +52,7 @@ interface CartProps {
   setIsWhatsApp: (v: boolean) => void;
 }
 
-/* �������������������������������������� MenuSection �������������������������������������� */
+/*                     MenuSection                     */
 const MenuSection = ({
   loading, filtered, availableToday, search, activeCat, btOn, btConnecting,
   setSearch, setCat, addToCart, connectBT, disconnectBT,
@@ -167,7 +168,7 @@ const MenuSection = ({
   </div>
 );
 
-/* �������������������������������������� CartSection �������������������������������������� */
+/*                     CartSection                     */
 const PAY_OPTS: { value: Pay; icon: React.ReactNode; label: string }[] = [
   { value: "PIX",      icon: <QrCode className="h-4 w-4" />,    label: "PIX"     },
   { value: "CARTAO",   icon: <CreditCard className="h-4 w-4" />, label: "Cartão"  },
@@ -388,7 +389,7 @@ const CartSection = (props: CartProps) => {
   );
 };
 
-/* �������������������������������������� KitchenSection �������������������������������������� */
+/*                     KitchenSection                     */
 const KitchenSection = ({ 
   orders, loading, kitchenSearch, setKitchenSearch, onAdvance, onPrint, onDelete, isAudioUnlocked, unlockAudio, goBack,
   activeSubTab, setActiveSubTab
@@ -720,8 +721,32 @@ const Balcao = () => {
 
 
   const addToCart = (product: Product) => {
-    setCart(prev => [...prev, { product, quantity: 1, size: "M", notes: "", extras: [] }]);
-    toast.success(`${product.name} adicionado!`);
+    const isPizza = ["classicos", "artesanais", "premium"].includes(product.category);
+    if (isPizza || product.category === "promocao") {
+      setSelectedProduct(product);
+      setModalOpen(true);
+    } else {
+      setCart(prev => {
+        const existing = prev.find(i => i.product.id === product.id && i.notes === "");
+        if (existing) {
+          return prev.map(i => i === existing ? { ...i, quantity: i.quantity + 1 } : i);
+        }
+        return [...prev, { product, quantity: 1, size: "M", notes: "", extras: [] }];
+      });
+      toast.success(`${product.name} adicionado!`);
+    }
+  };
+
+  const handleCustomAdd = (product: Product, size: any, qty: number, notes: string, extras: any[], customPrice?: number) => {
+    const finalProduct = customPrice !== undefined ? { ...product, price: customPrice } : product;
+    setCart(prev => {
+      const existing = prev.find(i => i.product.id === finalProduct.id && i.notes === notes && i.product.price === finalProduct.price);
+      if (existing) {
+        return prev.map(i => i === existing ? { ...i, quantity: i.quantity + qty } : i);
+      }
+      return [...prev, { product: finalProduct, quantity: qty, size, notes, extras }];
+    });
+    setModalOpen(false);
   };
 
   const updateQty = (index: number, d: number) =>
@@ -899,6 +924,14 @@ const Balcao = () => {
         </div>
       </div>
 
+      <ProductDetailDialog
+        product={selectedProduct}
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        dbProducts={dbProducts}
+        customOnAdd={handleCustomAdd}
+      />
+
       {/* MOBILE */}
       <div className="flex md:hidden flex-col bg-[#050505] text-white" style={{ height: "100dvh" }}>
         <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
@@ -931,6 +964,14 @@ const Balcao = () => {
           </button>
         </div>
       </div>
+
+      <ProductDetailDialog
+        product={selectedProduct}
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        dbProducts={dbProducts}
+        customOnAdd={handleCustomAdd}
+      />
 
       {printOrder && (
         <div id="print-receipt" className="hidden print:block">
