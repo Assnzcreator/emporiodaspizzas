@@ -210,19 +210,6 @@ const CartSection = (props: CartProps) => {
           </button>
         </div>
 
-        {/* Toggle Origem WhatsApp */}
-        <button
-          type="button"
-          onClick={() => setIsWhatsApp(!isWhatsApp)}
-          className={`w-full py-2.5 rounded-xl border font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
-            isWhatsApp 
-              ? "bg-green-500/10 border-green-500/40 text-green-400 shadow-[0_0_12px_rgba(34,197,94,0.15)] animate-in fade-in duration-300" 
-              : "bg-white/5 border-white/10 text-white/40 hover:border-white/20 hover:text-white/60"
-          }`}
-        >
-          <span className={`h-2 w-2 rounded-full ${isWhatsApp ? "bg-green-500 animate-pulse" : "bg-white/20"}`} />
-          Origem: WhatsApp
-        </button>
 
         <div className="space-y-2">
           <div className="relative">
