@@ -128,8 +128,8 @@ export const ProductDetailDialog = ({ product, open, onOpenChange, dbProducts }:
               </div>
             </div>
             
-            <DialogDescription className="mt-6 text-base leading-relaxed text-muted-foreground">
-              {product.longDescription}
+            <DialogDescription className="mt-6 text-base leading-relaxed text-muted-foreground whitespace-pre-wrap">
+              {product.description || (product as any).longDescription}
             </DialogDescription>
 
             <div className="mt-8">
