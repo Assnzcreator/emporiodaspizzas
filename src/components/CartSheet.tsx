@@ -11,10 +11,10 @@ import { useState, useEffect } from "react";
 const DELIVERY_FEE = 5.0;
 
 export const CartSheet = () => {
-  const { items, isOpen, setIsOpen, updateQty, removeItem, totalPrice, clear } = useCart();
+  const { items, isOpen, setIsOpen, updateQty, removeItem, totalPrice, clear, addItem } = useCart();
   const { placeOrder } = useOrders();
   
-  const [step, setStep] = useState<"CART" | "PROFILE" | "DELIVERY" | "PAYMENT" | "WAITING_PAYMENT">("CART");
+  const [step, setStep] = useState<"CART" | "PROFILE" | "DELIVERY" | "PAYMENT" | "WAITING_PAYMENT" | "SELECT_CRUST">("CART");
   const [deliveryType, setDeliveryType] = useState<DeliveryType>("DELIVERY");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("PIX");
   const [paymentChange, setPaymentChange] = useState("");
@@ -34,6 +34,28 @@ export const CartSheet = () => {
 
   const [showCrustReminder, setShowCrustReminder] = useState(false);
   const isFreeCrustDay = [1, 3].includes(new Date().getDay()); // 1 = Segunda, 3 = Quarta (para testes)
+
+  const [crusts, setCrusts] = useState<any[]>([]);
+  const [loadingCrusts, setLoadingCrusts] = useState(false);
+
+  useEffect(() => {
+    const fetchCrusts = async () => {
+      setLoadingCrusts(true);
+      const { data } = await supabase.from("products").select("*").eq("category", "adicionais").eq("available", true);
+      if (data) setCrusts(data);
+      setLoadingCrusts(false);
+    };
+    if (isFreeCrustDay) {
+      fetchCrusts();
+    }
+  }, [isFreeCrustDay]);
+
+  const handleAddFreeCrust = (crust: any) => {
+    const freeCrust = { ...crust, price: 0 };
+    addItem(freeCrust, "M", 1, "Borda Grátis");
+    toast.success(`${crust.name} adicionada gratuitamente!`);
+    setStep("CART");
+  };
 
   const finalTotal = items.length > 0 ? totalPrice + (deliveryType === "DELIVERY" ? DELIVERY_FEE : 0) : 0;
 
@@ -267,6 +289,7 @@ export const CartSheet = () => {
                   if (step === "PAYMENT") setStep("DELIVERY");
                   else if (step === "DELIVERY") setStep("PROFILE");
                   else if (step === "PROFILE") setStep("CART");
+                  else if (step === "SELECT_CRUST") setStep("CART");
                 }}
                 className="p-1 hover:bg-white/10 rounded-full transition-colors"
               >
@@ -275,7 +298,7 @@ export const CartSheet = () => {
             )}
             <SheetTitle className="flex items-center gap-2 text-lg text-white">
               <ShoppingBag className="h-5 w-5 text-primary" />
-              {step === "CART" ? "Seu Carrinho" : step === "PROFILE" ? "Identificação" : step === "DELIVERY" ? "Entrega" : step === "WAITING_PAYMENT" ? "Pagamento PIX" : "Pagamento"}
+              {step === "CART" ? "Seu Carrinho" : step === "PROFILE" ? "Identificação" : step === "DELIVERY" ? "Entrega" : step === "WAITING_PAYMENT" ? "Pagamento PIX" : step === "SELECT_CRUST" ? "Borda Grátis" : "Pagamento"}
             </SheetTitle>
           </div>
           <SheetDescription id="cart-description" className="sr-only">
@@ -283,22 +306,56 @@ export const CartSheet = () => {
           </SheetDescription>
         </SheetHeader>
 
-        {showCrustReminder ? (
+        {step === "SELECT_CRUST" ? (
+          <div className="flex flex-1 flex-col p-6 animate-fade-in overflow-y-auto">
+            <h3 className="text-xl font-bold mb-4">Escolha sua Borda Grátis</h3>
+            {loadingCrusts ? (
+               <div className="flex items-center justify-center py-10">
+                 <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+               </div>
+            ) : crusts.length === 0 ? (
+               <p className="text-muted-foreground text-center py-10">Nenhuma borda disponível no momento.</p>
+            ) : (
+               <div className="flex flex-col gap-3">
+                 {crusts.map(crust => (
+                   <button
+                     key={crust.id}
+                     onClick={() => handleAddFreeCrust(crust)}
+                     className="flex items-center gap-3 p-3 rounded-2xl border border-white/10 bg-white/5 hover:bg-primary/10 hover:border-primary/50 transition-all text-left"
+                   >
+                     {crust.image ? (
+                       <img src={crust.image} alt={crust.name} className="h-12 w-12 rounded-xl object-cover" />
+                     ) : (
+                       <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center">
+                         <Gift className="h-6 w-6 text-primary" />
+                       </div>
+                     )}
+                     <div className="flex-1">
+                       <h4 className="font-bold text-sm">{crust.name}</h4>
+                       <p className="text-xs text-primary font-bold">Grátis hoje!</p>
+                     </div>
+                     <Plus className="h-5 w-5 text-primary" />
+                   </button>
+                 ))}
+               </div>
+            )}
+          </div>
+        ) : showCrustReminder ? (
           <div className="flex flex-1 flex-col p-6 animate-fade-in items-center justify-center text-center">
             <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mb-6">
               <Gift className="h-8 w-8 text-primary" />
             </div>
             <h3 className="text-2xl font-black mb-2">Psiu! Tem Borda Grátis Hoje!</h3>
             <p className="text-sm text-muted-foreground mb-6">
-              Hoje é segunda-feira, dia de borda grátis! Se você ainda não adicionou, volte ao cardápio e escolha a sua borda recheada antes de finalizar o pedido.
+              Hoje é segunda-feira, dia de borda grátis! Se você ainda não adicionou, escolha a sua borda recheada antes de finalizar o pedido.
             </p>
 
             <div className="flex flex-col gap-3 w-full mt-auto pt-6">
               <Button onClick={() => {
                 setShowCrustReminder(false);
-                setIsOpen(false);
+                setStep("SELECT_CRUST");
               }} size="lg" className="w-full rounded-full btn-glass-primary font-bold shadow-xl shadow-primary/20">
-                Adicionar Borda
+                Escolher Borda
               </Button>
               <Button onClick={() => {
                 setShowCrustReminder(false);
