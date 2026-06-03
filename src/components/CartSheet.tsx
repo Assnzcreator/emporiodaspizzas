@@ -49,6 +49,14 @@ export const CartSheet = () => {
       if (data) {
         // Remove duplicates if any, and only show crusts
         const validCrusts = data.filter(p => p.category === "adicionais" || p.name.toLowerCase().includes("borda"));
+        
+        // Ordenar para que as bordas com preço 0 (promocionais) fiquem no topo
+        validCrusts.sort((a, b) => {
+          if (a.price === 0 && b.price !== 0) return -1;
+          if (b.price === 0 && a.price !== 0) return 1;
+          return a.name.localeCompare(b.name);
+        });
+        
         setCrusts(validCrusts);
       }
       setLoadingCrusts(false);
