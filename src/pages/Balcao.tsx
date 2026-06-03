@@ -100,33 +100,69 @@ const MenuSection = ({
         ))}
       </div>
     </div>
-    <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 p-3">
-        {loading ? (
-          Array.from({ length: 6 }).map((_, i) => (
+    <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3">
+      {loading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+          {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="aspect-[3/4] bg-white/5 rounded-2xl animate-pulse" />
-          ))
-        ) : filtered.length === 0 ? (
-          <div className="col-span-2 py-16 flex flex-col items-center gap-2 opacity-30">
-            <Search className="h-8 w-8" />
-            <p className="text-[10px] font-black uppercase">Sem resultados</p>
-          </div>
-        ) : filtered.map(product => (
-          <button
-            key={product.id}
-            onClick={() => addToCart(product)}
-            className="bg-[#111] border border-white/5 rounded-2xl flex flex-col items-center text-center p-2.5 gap-2 hover:border-primary/40 hover:bg-primary/5 active:scale-95 transition-all"
-          >
-            <div className="w-full aspect-square rounded-xl bg-white/5 overflow-hidden border border-white/5">
-              {product.image && <img src={product.image} alt={product.name} className="w-full h-full object-cover" />}
-            </div>
-            <div className="w-full">
-              <p className="text-[10px] font-black uppercase leading-tight line-clamp-2">{product.name}</p>
-              <p className="text-xs font-black text-primary">{formatBRL(product.price)}</p>
-            </div>
-          </button>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="py-16 flex flex-col items-center gap-2 opacity-30">
+          <Search className="h-8 w-8" />
+          <p className="text-[10px] font-black uppercase">Sem resultados</p>
+        </div>
+      ) : activeCat === "todos" && !search ? (
+        <div className="space-y-6 pb-6">
+          {categories.filter(c => c.id !== "adicionais").map(cat => {
+            const groupProducts = filtered.filter(p => p.category === cat.id);
+            if (groupProducts.length === 0) return null;
+            return (
+              <div key={cat.id} className="space-y-3">
+                <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+                  <span className="text-lg">{cat.emoji}</span>
+                  <h3 className="text-xs font-black uppercase text-primary tracking-widest">{cat.label}</h3>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                  {groupProducts.map(product => (
+                    <button
+                      key={product.id}
+                      onClick={() => addToCart(product)}
+                      className="bg-[#111] border border-white/5 rounded-2xl flex flex-col items-center text-center p-2.5 gap-2 hover:border-primary/40 hover:bg-primary/5 active:scale-95 transition-all"
+                    >
+                      <div className="w-full aspect-square rounded-xl bg-white/5 overflow-hidden border border-white/5">
+                        {product.image && <img src={product.image} alt={product.name} className="w-full h-full object-cover" />}
+                      </div>
+                      <div className="w-full">
+                        <p className="text-[10px] font-black uppercase leading-tight line-clamp-2">{product.name}</p>
+                        <p className="text-xs font-black text-primary">{formatBRL(product.price)}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+          {filtered.map(product => (
+            <button
+              key={product.id}
+              onClick={() => addToCart(product)}
+              className="bg-[#111] border border-white/5 rounded-2xl flex flex-col items-center text-center p-2.5 gap-2 hover:border-primary/40 hover:bg-primary/5 active:scale-95 transition-all"
+            >
+              <div className="w-full aspect-square rounded-xl bg-white/5 overflow-hidden border border-white/5">
+                {product.image && <img src={product.image} alt={product.name} className="w-full h-full object-cover" />}
+              </div>
+              <div className="w-full">
+                <p className="text-[10px] font-black uppercase leading-tight line-clamp-2">{product.name}</p>
+                <p className="text-xs font-black text-primary">{formatBRL(product.price)}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   </div>
 );
@@ -678,13 +714,16 @@ const Balcao = () => {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return dbProducts.filter(b => {
+    const result = dbProducts.filter(b => {
       // No Balcão, nunca mostramos adicionais no cardápio principal
       if (b.category === "adicionais") return false;
       
       return (activeCat === "todos" || b.category === activeCat) &&
              (!q || b.name.toLowerCase().includes(q));
     });
+    
+    // Ordenar alfabeticamente para ficar mais organizado
+    return result.sort((a, b) => a.name.localeCompare(b.name));
   }, [dbProducts, search, activeCat]);
 
   const addToCart = (product: Product) => {
