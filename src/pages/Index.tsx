@@ -155,7 +155,8 @@ const Storefront = () => {
       setShowClosedModal(true); 
       return; 
     }
-    if (b.category === "promocao") {
+    const isPizza = ["classicos", "artesanais", "premium"].includes(b.category);
+    if (b.category === "promocao" || isPizza) {
       openDetail(b);
       return;
     }

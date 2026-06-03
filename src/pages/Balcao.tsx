@@ -965,14 +965,6 @@ const Balcao = () => {
         </div>
       </div>
 
-      <ProductDetailDialog
-        product={selectedProduct}
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        dbProducts={dbProducts}
-        customOnAdd={handleCustomAdd}
-      />
-
       {printOrder && (
         <div id="print-receipt" className="hidden print:block">
           <div className="text-center font-bold mb-2">--- VIA ESTABELECIMENTO ---</div>
