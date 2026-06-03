@@ -97,15 +97,23 @@ export const ProductDetailDialog = ({ product, open, onOpenChange, dbProducts }:
     : [];
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl overflow-hidden p-0 gap-0 border-white/5 bg-background shadow-2xl">
-        <div className="grid md:grid-cols-2">
-          <div className="relative aspect-square md:aspect-auto bg-muted">
+      <DialogContent className="max-w-4xl max-h-[100dvh] sm:max-h-[90dvh] h-[100dvh] sm:h-auto overflow-hidden p-0 gap-0 border-white/5 bg-background shadow-2xl">
+        <div className="grid md:grid-cols-2 h-full overflow-y-auto">
+          <div className="relative aspect-square md:aspect-auto bg-muted shrink-0">
             <img
               src={product.image}
               alt={product.name}
               className="h-full w-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent pointer-events-none md:bg-gradient-to-r" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4 h-10 w-10 rounded-full bg-black/40 text-white hover:bg-black/60 z-50 md:hidden backdrop-blur-sm"
+              onClick={() => onOpenChange(false)}
+            >
+              <X className="h-5 w-5" />
+            </Button>
           </div>
           
           <div className="flex flex-col p-8 md:p-12">
