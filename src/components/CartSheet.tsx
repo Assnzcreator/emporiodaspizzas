@@ -33,8 +33,6 @@ export const CartSheet = () => {
   const [pixOrderId, setPixOrderId] = useState<string | null>(null);
 
   const [showCrustReminder, setShowCrustReminder] = useState(false);
-  const isFreeCrustDay = [1, 3].includes(new Date().getDay()); // 1 = Segunda, 3 = Quarta (para testes)
-
   const [crusts, setCrusts] = useState<any[]>([]);
   const [loadingCrusts, setLoadingCrusts] = useState(false);
 
@@ -47,8 +45,12 @@ export const CartSheet = () => {
         .eq("available", true)
         .or("category.eq.adicionais,name.ilike.%Borda%");
       if (data) {
-        // Remove duplicates if any, and only show crusts
-        const validCrusts = data.filter(p => p.category === "adicionais" || p.name.toLowerCase().includes("borda"));
+        const currentDay = new Date().getDay();
+        const validCrusts = data.filter(p => {
+          if (p.category !== "adicionais" && !p.name.toLowerCase().includes("borda")) return false;
+          if (p.available_days && !p.available_days.includes(currentDay)) return false;
+          return true;
+        });
         
         // Ordenar para que as bordas com preço 0 (promocionais) fiquem no topo
         validCrusts.sort((a, b) => {
@@ -61,11 +63,11 @@ export const CartSheet = () => {
       }
       setLoadingCrusts(false);
     };
-    if (isFreeCrustDay) {
-      fetchCrusts();
-    }
-  }, [isFreeCrustDay]);
-  const hasFreeCrustInCart = items.some(item => item.notes === "Borda Grátis");
+    fetchCrusts();
+  }, []);
+
+  const isFreeCrustDay = crusts.some(c => c.price === 0);
+  const hasFreeCrustInCart = items.some(item => item.notes === "Borda Grátis");
 
   const handleAddFreeCrust = (crust: any) => {
     if (hasFreeCrustInCart) {
@@ -369,7 +371,7 @@ export const CartSheet = () => {
             </div>
             <h3 className="text-2xl font-black mb-2">Psiu! Tem Borda Grátis Hoje!</h3>
             <p className="text-sm text-muted-foreground mb-6">
-              Hoje é segunda-feira, dia de borda grátis! Se você ainda não adicionou, escolha a sua borda recheada antes de finalizar o pedido.
+              Hoje é dia de borda grátis! Se você ainda não adicionou, escolha a sua borda recheada antes de finalizar o pedido.
             </p>
 
             <div className="flex flex-col gap-3 w-full mt-auto pt-6">
