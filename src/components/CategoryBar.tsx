@@ -5,10 +5,12 @@ interface Props {
   active: Category | "todos" | "pedidos";
   onChange: (c: Category | "todos" | "pedidos") => void;
   showPedidos?: boolean;
+  availableCategories?: any[];
 }
 
-export const CategoryBar = ({ active, onChange, showPedidos }: Props) => {
-  const all: any[] = [{ id: "todos" as const, label: "Todos", emoji: "🍕" }, ...categories.filter(c => c.id !== "adicionais" && c.id !== "rodizio")];
+export const CategoryBar = ({ active, onChange, showPedidos, availableCategories }: Props) => {
+  const cats = availableCategories || categories.filter(c => c.id !== "adicionais" && c.id !== "rodizio");
+  const all: any[] = [{ id: "todos" as const, label: "Todos", emoji: "🍕" }, ...cats];
   if (showPedidos) {
     all.push({ id: "pedidos" as const, label: "Meus Pedidos", emoji: "📜" });
   }

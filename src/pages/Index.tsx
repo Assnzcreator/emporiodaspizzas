@@ -130,11 +130,19 @@ const Storefront = () => {
     });
   }, [search, activeCat, dbProducts, currentDay]);
 
+  const availableCategories = useMemo(() => {
+    return categories.filter(c => {
+      if (c.id === "adicionais" || c.id === "rodizio") return false;
+      return dbProducts.some(p => p.category === c.id && (!p.available_days || p.available_days.includes(currentDay)));
+    });
+  }, [dbProducts, currentDay]);
+
   const grouped = useMemo(() => {
     if (activeCat !== "todos") return [{ cat: activeCat, items: filtered }];
     return categories
       .filter((c) => c.id !== "adicionais" && c.id !== "rodizio")
       .map((c) => ({ cat: c.id, items: filtered.filter((b) => b.category === c.id) }))
+      .filter((g) => g.items.length > 0);
   }, [filtered, activeCat]);
 
   const openDetail = (b: Product) => {
@@ -178,7 +186,7 @@ const Storefront = () => {
       <Hero onCta={() => menuRef.current?.scrollIntoView({ behavior: "smooth" })} />
 
       <div ref={menuRef} className="sticky top-20 z-40">
-        <CategoryBar active={activeCat} onChange={(cat: any) => setActiveCat(cat)} />
+        <CategoryBar active={activeCat} onChange={(cat: any) => setActiveCat(cat)} availableCategories={availableCategories} />
       </div>
 
       <main className="container flex-1 py-8 overflow-hidden">

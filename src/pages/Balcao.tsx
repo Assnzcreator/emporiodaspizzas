@@ -26,7 +26,7 @@ type Pay = "PIX" | "CARTAO" | "DINHEIRO";
 type Tab = "menu" | "cart" | "kitchen";
 
 interface MenuProps {
-  loading: boolean; filtered: Product[]; search: string; activeCat: string;
+  loading: boolean; filtered: Product[]; availableToday: Product[]; search: string; activeCat: string;
   btOn: boolean; btConnecting: boolean;
   setSearch: (v: string) => void; setCat: (v: string) => void;
   addToCart: (b: Product) => void; connectBT: () => void; disconnectBT: () => void;
@@ -53,7 +53,7 @@ interface CartProps {
 
 /* �������������������������������������� MenuSection �������������������������������������� */
 const MenuSection = ({
-  loading, filtered, search, activeCat, btOn, btConnecting,
+  loading, filtered, availableToday, search, activeCat, btOn, btConnecting,
   setSearch, setCat, addToCart, connectBT, disconnectBT,
 }: MenuProps) => (
   <div className="flex flex-col h-full min-h-0">
@@ -852,7 +852,7 @@ const Balcao = () => {
   };
 
   const commonProps = {
-    loading, filtered, search, activeCat, btOn: !!btConn, btConnecting,
+    loading, filtered, availableToday, search, activeCat, btOn: !!btConn, btConnecting,
     setSearch, setCat: setActiveCat, addToCart, connectBT,
     disconnectBT: () => { btConn?.disconnect(); setBtConn(null); },
     cart, customerName, customerPhone, deliveryType, deliveryAddress, deliveryFee, pay, finalizing, total, totalItems,
