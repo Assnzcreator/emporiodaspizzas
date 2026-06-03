@@ -65,8 +65,14 @@ export const CartSheet = () => {
       fetchCrusts();
     }
   }, [isFreeCrustDay]);
+  const hasFreeCrustInCart = items.some(item => item.notes === "Borda Grátis");
 
   const handleAddFreeCrust = (crust: any) => {
+    if (hasFreeCrustInCart) {
+      toast.error("Você já adicionou sua borda grátis!");
+      setStep("CART");
+      return;
+    }
     const freeCrust = { ...crust, price: 0 };
     addItem(freeCrust, "M", 1, "Borda Grátis");
     toast.success(`${crust.name} adicionada gratuitamente!`);
@@ -101,7 +107,7 @@ export const CartSheet = () => {
            { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${pixOrderId}` },
            (payload) => {
              if (payload.new.status === "PREPARANDO" || payload.new.status === "PAGO") {
-                toast.success("Pagamento PIX Aprovado! �x}0", {
+                toast.success("Pagamento PIX Aprovado! x}0", {
                   description: "Seu pedido já está em preparação!"
                 });
                  clear();
@@ -187,7 +193,7 @@ export const CartSheet = () => {
   };
 
   const handleInitialCheckout = () => {
-    if (isFreeCrustDay && !showCrustReminder) {
+    if (isFreeCrustDay && !showCrustReminder && !hasFreeCrustInCart) {
       setShowCrustReminder(true);
       return;
     }
