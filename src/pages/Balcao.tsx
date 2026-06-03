@@ -575,6 +575,8 @@ const Balcao = () => {
   const [pay, setPay]             = useState<Pay>("PIX");
   const [finalizing, setFinalizing] = useState(false);
   const [tab, setTab]             = useState<Tab>("menu");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const [isWhatsApp, setIsWhatsApp] = useState(false);
   const [btConn, setBtConn]       = useState<BTConnection | null>(null);
   const [btConnecting, setBtConnecting] = useState(false);
