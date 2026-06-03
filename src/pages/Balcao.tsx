@@ -87,7 +87,7 @@ const MenuSection = ({
         />
       </div>
       <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-0.5">
-        {["todos", ...categories.filter(c => c.id !== "adicionais" && (c.id !== "rodizio" || [5, 6].includes(new Date().getDay()))).map(c => c.id)].map(id => (
+        {["todos", ...categories.filter(c => c.id !== "adicionais" && availableToday.some(p => p.category === c.id)).map(c => c.id)].map(id => (
           <button
             key={id}
             onClick={() => setCat(id)}
@@ -114,7 +114,7 @@ const MenuSection = ({
         </div>
       ) : activeCat === "todos" && !search ? (
         <div className="space-y-6 pb-6">
-          {categories.filter(c => c.id !== "adicionais" && (c.id !== "rodizio" || [5, 6].includes(new Date().getDay()))).map(cat => {
+          {categories.filter(c => c.id !== "adicionais" && availableToday.some(p => p.category === c.id)).map(cat => {
             const groupProducts = filtered.filter(p => p.category === cat.id);
             if (groupProducts.length === 0) return null;
             return (
@@ -699,25 +699,24 @@ const Balcao = () => {
     setLoading(false);
   };
 
-  const filtered = useMemo(() => {
+  const availableToday = useMemo(() => {
     const currentDay = new Date().getDay();
-    const q = search.trim().toLowerCase();
-    const result = dbProducts.filter(b => {
-      // No Balcão, nunca mostramos adicionais no cardápio principal
+    return dbProducts.filter(b => {
       if (b.category === "adicionais") return false;
-      
-      // Regra de disponibilidade
-      if (b.available_days && !b.available_days.includes(currentDay)) {
-        return false;
-      }
-      
+      if (b.available_days && !b.available_days.includes(currentDay)) return false;
+      return true;
+    });
+  }, [dbProducts]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const result = availableToday.filter(b => {
       return (activeCat === "todos" || b.category === activeCat) &&
              (!q || b.name.toLowerCase().includes(q));
     });
     
-    // Ordenar alfabeticamente para ficar mais organizado
     return result.sort((a, b) => a.name.localeCompare(b.name));
-  }, [dbProducts, search, activeCat]);
+  }, [availableToday, search, activeCat]);
 
 
   const addToCart = (product: Product) => {
