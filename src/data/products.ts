@@ -30,7 +30,8 @@ export const products: Product[] = [
     description: "✅ Pastéis crocantes e recheados\n✅ Coxinhas irresistíveis\n✅ Lasanhas saborosas\n✅ Panquecas especiais\n✅ Batata frita sequinha e crocante\n✅ Pizzas de todos os sabores, doces e salgadas\n✅ Deliciosos milkshakes para completar sua refeição",
     price: 30,
     image: "", 
-    category: "rodizio"
+    category: "rodizio",
+    available_days: [5, 6]
   },
   {
     id: "rodizio-casa",
@@ -38,7 +39,8 @@ export const products: Product[] = [
     description: "✅ Pastéis crocantes e recheados\n✅ Coxinhas irresistíveis\n✅ Lasanhas saborosas\n✅ Panquecas especiais\n✅ Batata frita sequinha e crocante\n✅ Pizzas de todos os sabores, doces e salgadas",
     price: 25,
     image: "", 
-    category: "rodizio"
+    category: "rodizio",
+    available_days: [5, 6]
   }
 ];
 
