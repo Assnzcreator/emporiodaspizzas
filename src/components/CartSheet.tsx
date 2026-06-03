@@ -33,7 +33,7 @@ export const CartSheet = () => {
   const [pixOrderId, setPixOrderId] = useState<string | null>(null);
 
   const [showCrustReminder, setShowCrustReminder] = useState(false);
-  const isFreeCrustDay = new Date().getDay() === 1; // 1 = Segunda-feira
+  const isFreeCrustDay = [1, 3].includes(new Date().getDay()); // 1 = Segunda, 3 = Quarta (para testes)
 
   const finalTotal = items.length > 0 ? totalPrice + (deliveryType === "DELIVERY" ? DELIVERY_FEE : 0) : 0;
 
