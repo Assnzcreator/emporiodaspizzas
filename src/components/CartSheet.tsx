@@ -41,8 +41,16 @@ export const CartSheet = () => {
   useEffect(() => {
     const fetchCrusts = async () => {
       setLoadingCrusts(true);
-      const { data } = await supabase.from("products").select("*").eq("category", "adicionais").eq("available", true);
-      if (data) setCrusts(data);
+      const { data } = await supabase
+        .from("products")
+        .select("*")
+        .eq("available", true)
+        .or("category.eq.adicionais,name.ilike.%Borda%");
+      if (data) {
+        // Remove duplicates if any, and only show crusts
+        const validCrusts = data.filter(p => p.category === "adicionais" || p.name.toLowerCase().includes("borda"));
+        setCrusts(validCrusts);
+      }
       setLoadingCrusts(false);
     };
     if (isFreeCrustDay) {
