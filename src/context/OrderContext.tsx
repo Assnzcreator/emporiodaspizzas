@@ -143,21 +143,21 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
           const isStaffArea = window.location.pathname.includes('/admin') || 
                              window.location.pathname.includes('/balcao');
 
-          // 1. NOVO PEDIDO (S� PARA ADMIN/COZINHA)
+          // 1. NOVO PEDIDO (SÓ PARA ADMIN/COZINHA)
           if (payload.eventType === "INSERT" && isStaffArea) {
             playNotificationSound('new');
             if ("Notification" in window && Notification.permission === "granted") {
-              new Notification("�x� NOVO PEDIDO!", { body: `Cliente: ${payload.new.customer_name}` });
+              new Notification("🔔 NOVO PEDIDO!", { body: `Cliente: ${payload.new.customer_name}` });
             }
-            toast.success(`�x� NOVO PEDIDO: ${payload.new.customer_name}`, { duration: 8000 });
+            toast.success(`🔔 NOVO PEDIDO: ${payload.new.customer_name}`, { duration: 8000 });
           }
 
-          // 2. PEDIDO PRONTO PARA COLETA (S� PARA ADMIN/COZINHA)
+          // 2. PEDIDO PRONTO PARA COLETA (SÓ PARA ADMIN/COZINHA)
           if (payload.eventType === "UPDATE" && payload.new.status === "PRONTO" && payload.old?.status !== "PRONTO" && isStaffArea) {
             playNotificationSound('ready');
-            toast.info(`�x� PRONTO PARA ENTREGA: ${payload.new.customer_name}`, { 
+            toast.info(`🛵 PRONTO PARA ENTREGA: ${payload.new.customer_name}`, { 
               duration: 10000,
-              icon: '�S&'
+              icon: '🛵'
             });
           }
 
@@ -219,7 +219,7 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
 
       // Não envia WhatsApp para pedidos do Balcão (sem telefone real)
       if (deliveryType !== "BALCAO") {
-        const message = `�S& *Pedido Confirmado! - Empório das Pizzas*\n\nOlá, *${customerName}*! Seu pedido foi confirmado com sucesso.\n\nNossa equipe já está preparando tudo com muito carinho! Assim que o seu pedido sair para entrega ou estiver pronto para retirada, avisaremos você por aqui! �x�"\n\n�x� *Resumo do Pedido:* \n${itemsSummary}\n\n�x� *Total:* ${formatBRL(total)}`;
+        const message = `✅ *Pedido Confirmado! - Empório das Pizzas*\n\nOlá, *${customerName}*! Tudo certo com seu pedido. 🍕\n\nNossa equipe já está com a mão na massa preparando sua pizza com muito carinho e ingredientes fresquinhos! Assim que estiver pronto para sair, avisaremos você por aqui! 🛵💨\n\n📋 *Resumo do Pedido:* \n${itemsSummary}\n\n💰 *Total:* ${formatBRL(total)}\n\nAgradecemos a preferência! Bom apetite! 🍕❤️`;
         await sendWhatsAppMessage(customerPhone, message);
       }
 

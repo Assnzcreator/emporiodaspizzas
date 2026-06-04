@@ -109,7 +109,7 @@ export const CartSheet = () => {
            { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${pixOrderId}` },
            (payload) => {
              if (payload.new.status === "PREPARANDO" || payload.new.status === "PAGO") {
-                toast.success("Pagamento PIX Aprovado! x}0", {
+                toast.success("Pagamento PIX Aprovado! ✅", {
                   description: "Seu pedido já está em preparação!"
                 });
                  clear();
@@ -275,7 +275,7 @@ export const CartSheet = () => {
     
     if (order) {
       if (paymentMethod === "PIX") {
-        toast.success("Pedido Confirmado! �xa�", {
+        toast.success("Pedido Confirmado! 🍕", {
           description: "Seu pedido já foi confirmado e enviado para o preparo! Pague via PIX na entrega ou envie o comprovante.",
         });
         clear();
@@ -283,7 +283,7 @@ export const CartSheet = () => {
         setStep("CART");
         setIsGeneratingPix(false);
       } else {
-        toast.success("Pedido Confirmado! �x}0", {
+        toast.success("Pedido Confirmado! 🍕", {
           description: `Total: ${formatBRL(finalTotal)} · Enviamos os detalhes de confirmação no seu WhatsApp!`,
         });
         clear();
@@ -671,7 +671,7 @@ export const CartSheet = () => {
             </div>
             <p className="font-semibold">Seu carrinho está vazio</p>
             <span className="text-lg sm:text-2xl font-black tracking-tighter text-foreground leading-none">
-              EMP�RIO<span className="text-primary"> DAS PIZZAS</span>
+              EMPÓRIO<span className="text-primary"> DAS PIZZAS</span>
             </span>
             <span className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground leading-none mt-0.5">
               Pizzaria Artesanal
