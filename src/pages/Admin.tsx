@@ -126,8 +126,8 @@ const Admin = () => {
 
   const exportToCSV = () => {
     if (filteredOrders.length === 0) return toast.error("Sem dados para exportar.");
-    const headers = ["ID", "Cliente", "Data", "Status", "Metodo Pagamento", "Total"];
-    const rows = filteredOrders.map(o => [o.id.slice(0, 8).toUpperCase(), o.customer_name, format(new Date(o.created_at), "dd/MM/yyyy HH:mm"), o.status, o.payment_method, o.total.toFixed(2)]);
+    const headers = ["ID", "Dia_Ped", "Cliente", "Data", "Status", "Metodo Pagamento", "Total"];
+    const rows = filteredOrders.map(o => [o.id.slice(0, 8).toUpperCase(), o.daily_number || "-", o.customer_name, format(new Date(o.created_at), "dd/MM/yyyy HH:mm"), o.status, o.payment_method, o.total.toFixed(2)]);
     const csvContent = [headers.join(","), ...rows.map(row => row.map(cell => `"${cell}"`).join(","))].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
@@ -424,7 +424,11 @@ const Admin = () => {
                     <tbody className="text-sm divide-y divide-white/[0.03]">
                       {filteredOrders.slice(0, 10).map((order) => (
                         <tr key={order.id} className="hover:bg-white/[0.01] transition-colors group">
-                          <td className="px-4 sm:px-8 py-4 sm:py-5 text-muted-foreground font-mono text-[10px] hidden sm:table-cell">#{order.id.slice(0,8).toUpperCase()}</td>
+                          <td className="px-4 sm:px-8 py-4 sm:py-5 text-muted-foreground font-mono text-[10px] hidden sm:table-cell">
+                            {order.daily_number ? `Ped #${order.daily_number} (` : '#'}
+                            {order.id.slice(0, 8).toUpperCase()}
+                            {order.daily_number ? ')' : ''}
+                          </td>
                           <td className="px-4 sm:px-8 py-4 sm:py-5 text-center">
                             <span className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${
                               String(order.delivery_type || "").startsWith('WHATSAPP') 

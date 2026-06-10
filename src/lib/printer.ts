@@ -44,7 +44,12 @@ export const encodeOrderForPrinter = (order: Order) => {
     
     // Detalhes do Pedido
     addCommand([ESC, 0x61, 0]); // Esquerda
-    addLine(`PEDIDO: #${order.id.slice(0, 5).toUpperCase()}`);
+    if (order.daily_number) {
+      addCommand([GS, 0x21, 0x11]); // Tamanho duplo
+      addLine(`PEDIDO #${order.daily_number}`);
+      addCommand([GS, 0x21, 0x00]); // Tamanho normal
+    }
+    addLine(`ID: #${order.id.slice(0, 5).toUpperCase()}`);
     addLine(`DATA: ${new Date(order.created_at).toLocaleString('pt-BR')}`);
     addLine(`CLIENTE: ${order.customer_name}`);
     if (order.customer_phone && order.customer_phone !== "00000000000") {

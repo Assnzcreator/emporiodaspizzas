@@ -498,7 +498,11 @@ const KitchenSection = ({
                      String(order.delivery_type || "").toUpperCase().includes('PICKUP') ? 'RETIRADA' : 'BALCÒO'}
                   </span>
                   
-                  <span className="text-[9px] font-bold text-white/30">#{order.id.slice(0, 5).toUpperCase()}</span>
+                  <span className="text-[9px] font-bold text-white/30">
+                    {order.daily_number ? `Ped #${order.daily_number} (` : '#'}
+                    {order.id.slice(0, 5).toUpperCase()}
+                    {order.daily_number ? ')' : ''}
+                  </span>
                 </div>
                 <h3 className="font-black text-lg uppercase tracking-tight">{order.customer_name}</h3>
                 {order.customer_phone && order.customer_phone !== "00000000000" && (

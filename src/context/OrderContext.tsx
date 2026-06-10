@@ -34,6 +34,7 @@ export interface Order {
   motoboy_id: string | null;
   motoboy_name?: string | null;
   items?: OrderItem[];
+  daily_number?: number;
 }
 
 interface OrderContextValue {
@@ -71,6 +72,23 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
         motoboy_name: order.motoboys?.name,
         items: (itemsData as OrderItem[]).filter((item) => item.order_id === order.id),
       }));
+
+      // Calcular o daily_number (número do pedido no dia)
+      const ascendingOrders = [...fullOrders].reverse();
+      const dailyCounters: Record<string, number> = {};
+      
+      ascendingOrders.forEach(order => {
+        const d = new Date(order.created_at);
+        // Desconta 4 horas para que pedidos de madrugada contem para o dia anterior
+        d.setHours(d.getHours() - 4); 
+        const dateStr = d.toLocaleDateString('pt-BR');
+        
+        if (!dailyCounters[dateStr]) {
+          dailyCounters[dateStr] = 0;
+        }
+        dailyCounters[dateStr]++;
+        order.daily_number = dailyCounters[dateStr];
+      });
 
       setOrders(fullOrders);
     } catch (error) {
