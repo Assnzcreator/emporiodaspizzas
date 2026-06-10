@@ -10,7 +10,9 @@ export const encodeOrderForPrinter = (order: Order) => {
   let chunks: Uint8Array[] = [];
 
   const addLine = (text: string = "") => {
-    chunks.push(encoder.encode(text + "\n"));
+    // Remove acentos para evitar caracteres estranhos na impressora térmica (que usa ASCII/CP850)
+    const cleanText = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    chunks.push(encoder.encode(cleanText + "\n"));
   };
 
   const addCommand = (cmds: number[]) => {
@@ -37,17 +39,17 @@ export const encodeOrderForPrinter = (order: Order) => {
     addLine("\n");
 
     // Alinhamento centralizado e Negrito para o Título do Estabelecimento
-    addCommand([GS, 0x21, 0x11]); // Tamanho duplo
-    addLine("EMP�RIO DAS PIZZAS");
-    addCommand([GS, 0x21, 0x00]); // Tamanho normal
+    addCommand([ESC, 0x45, 1]); // Negrito ON
+    addLine("EMPORIO DAS PIZZAS");
+    addCommand([ESC, 0x45, 0]); // Negrito OFF
     addLine("--------------------------------");
     
     // Detalhes do Pedido
     addCommand([ESC, 0x61, 0]); // Esquerda
     if (order.daily_number) {
-      addCommand([GS, 0x21, 0x11]); // Tamanho duplo
+      addCommand([ESC, 0x45, 1]); // Negrito ON
       addLine(`PEDIDO #${order.daily_number}`);
-      addCommand([GS, 0x21, 0x00]); // Tamanho normal
+      addCommand([ESC, 0x45, 0]); // Negrito OFF
     }
     addLine(`ID: #${order.id.slice(0, 5).toUpperCase()}`);
     addLine(`DATA: ${new Date(order.created_at).toLocaleString('pt-BR')}`);
@@ -57,7 +59,7 @@ export const encodeOrderForPrinter = (order: Order) => {
     }
     
     const typeLabel = String(order.delivery_type || "").toUpperCase().includes('DELIVERY') ? 'ENTREGA' : 
-                     String(order.delivery_type || "").toUpperCase().includes('PICKUP') ? 'RETIRADA' : 'BALCÒO';
+                     String(order.delivery_type || "").toUpperCase().includes('PICKUP') ? 'RETIRADA' : 'BALCAO';
     
     addLine(`TIPO: ${typeLabel}`);
     
