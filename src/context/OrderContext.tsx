@@ -241,7 +241,26 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
         await sendWhatsAppMessage(customerPhone, message);
       }
 
-      return orderData as Order;
+      // Calcular o daily_number proativo para retorno imediato (evitar undefined na impressão instantânea)
+      const dNow = new Date();
+      dNow.setHours(dNow.getHours() - 4);
+      const nowStr = dNow.toLocaleDateString('pt-BR');
+
+      let todayCount = 0;
+      orders.forEach(o => {
+        const d = new Date(o.created_at);
+        d.setHours(d.getHours() - 4);
+        if (d.toLocaleDateString('pt-BR') === nowStr) {
+          todayCount++;
+        }
+      });
+
+      const orderDataWithDailyNumber = {
+        ...orderData,
+        daily_number: todayCount + 1
+      };
+
+      return orderDataWithDailyNumber as Order;
     } catch (error: any) {
       console.error("Error placing order:", error);
       toast.error(`Erro no Banco: ${error.message || "Erro desconhecido"}`);
