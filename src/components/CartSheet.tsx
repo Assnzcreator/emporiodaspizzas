@@ -778,25 +778,33 @@ export const CartSheet = () => {
                       </div>
                       <div className="mt-auto pt-2 flex items-center justify-between">
                         <div className="flex items-center gap-1 rounded-full bg-black/50 border border-white/10 p-0.5">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-7 w-7 rounded-full text-white hover:bg-white/10 hover:text-white"
-                            onClick={() => updateQty(item.key, item.quantity - 1)}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <span className="w-6 text-center text-sm font-bold text-white">
-                            {item.quantity}
-                          </span>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-7 w-7 rounded-full text-white hover:bg-white/10 hover:text-white"
-                            onClick={() => updateQty(item.key, item.quantity + 1)}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
+                          {(item.product.category === "promocao" || (item.notes && item.notes.includes("METADE"))) ? (
+                            <span className="w-10 text-center text-sm font-bold text-white py-1">
+                              {item.quantity}x
+                            </span>
+                          ) : (
+                            <>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7 rounded-full text-white hover:bg-white/10 hover:text-white"
+                                onClick={() => updateQty(item.key, item.quantity - 1)}
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
+                              <span className="w-6 text-center text-sm font-bold text-white">
+                                {item.quantity}
+                              </span>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7 rounded-full text-white hover:bg-white/10 hover:text-white"
+                                onClick={() => updateQty(item.key, item.quantity + 1)}
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </>
+                          )}
                         </div>
                         <span className="font-bold text-primary">
                           {formatBRL(item.unitPrice * item.quantity)}

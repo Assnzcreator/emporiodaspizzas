@@ -112,7 +112,12 @@ export const ProductDetailDialog = ({ product, open, onOpenChange, dbProducts, c
     
     if (product.category === "promocao") {
       const baseRules = PROMO_RULES[product.name] || PROMO_RULES['DEFAULT'];
-      const rules = Array(qty).fill(baseRules).flat();
+      const rules = Array.from({ length: qty }).flatMap((_, comboIndex) => 
+        baseRules.map(rule => ({
+          ...rule,
+          label: qty > 1 ? `Combo ${comboIndex + 1} - ${rule.label}` : rule.label
+        }))
+      );
       const flavorsText = promoSelections.map((s, idx) => `${idx + 1}. ${s} (${rules[idx].label})`).join("\n");
       finalNotes = `Sabores escolhidos:\n${flavorsText}\n${notes ? '\nObs: ' + notes : ''}`.trim();
     } else if (isPizza && isHalf) {
@@ -137,7 +142,12 @@ export const ProductDetailDialog = ({ product, open, onOpenChange, dbProducts, c
   const basePromoRules = product?.category === "promocao" 
     ? (PROMO_RULES[product.name] || PROMO_RULES['DEFAULT'])
     : [];
-  const currentPromoRules = Array(qty).fill(basePromoRules).flat();
+  const currentPromoRules = Array.from({ length: qty }).flatMap((_, comboIndex) => 
+    basePromoRules.map(rule => ({
+      ...rule,
+      label: qty > 1 ? `Combo ${comboIndex + 1} - ${rule.label}` : rule.label
+    }))
+  );
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[100dvh] sm:max-h-[90dvh] h-[100dvh] sm:h-auto overflow-hidden p-0 gap-0 border-white/5 bg-background shadow-2xl">
