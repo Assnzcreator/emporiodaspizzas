@@ -1,4 +1,4 @@
-import { Minus, Plus, ShoppingBag, Trash2, User, Phone, MapPin, Store, ChevronLeft, Navigation, QrCode, CreditCard, Banknote, Copy, CheckCircle2, Gift } from "lucide-react";
+import { Minus, Plus, ShoppingBag, Trash2, User, Phone, MapPin, Store, ChevronLeft, Navigation, QrCode, CreditCard, Banknote, Copy, CheckCircle2, Gift, AlertTriangle } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -14,7 +14,8 @@ export const CartSheet = () => {
   const { items, isOpen, setIsOpen, updateQty, removeItem, totalPrice, clear, addItem } = useCart();
   const { placeOrder } = useOrders();
   
-  const [step, setStep] = useState<"CART" | "PROFILE" | "DELIVERY" | "PAYMENT" | "WAITING_PAYMENT" | "SELECT_CRUST">("CART");
+  const [step, setStep] = useState<"CART" | "PROFILE" | "DELIVERY" | "PAYMENT" | "WAITING_PAYMENT" | "SELECT_CRUST" | "EXISTING_ORDER_WARNING">("CART");
+  const [existingOrder, setExistingOrder] = useState<any>(null);
   const [deliveryType, setDeliveryType] = useState<DeliveryType>("DELIVERY");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("PIX");
   const [paymentChange, setPaymentChange] = useState("");
@@ -194,7 +195,34 @@ export const CartSheet = () => {
     );
   };
 
-  const handleInitialCheckout = () => {
+  const checkExistingOrder = async (currentPhone: string) => {
+    try {
+      const dNow = new Date();
+      dNow.setHours(dNow.getHours() - 4);
+      const todayStr = dNow.toISOString().split('T')[0];
+      
+      const { data } = await supabase
+        .from('orders')
+        .select('created_at, items:order_items(product_name, quantity)')
+        .eq('customer_phone', currentPhone)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (data && data.length > 0) {
+        const orderDate = new Date(data[0].created_at);
+        orderDate.setHours(orderDate.getHours() - 4);
+        if (orderDate.toISOString().split('T')[0] === todayStr) {
+          setExistingOrder(data[0]);
+          return true;
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return false;
+  };
+
+  const handleInitialCheckout = async () => {
     if (isFreeCrustDay && !showCrustReminder && !hasFreeCrustInCart) {
       setShowCrustReminder(true);
       return;
@@ -203,11 +231,16 @@ export const CartSheet = () => {
     if (!name || !phone) {
       setStep("PROFILE");
     } else {
-      setStep("DELIVERY");
+      const hasExisting = await checkExistingOrder(phone);
+      if (hasExisting) {
+        setStep("EXISTING_ORDER_WARNING");
+      } else {
+        setStep("DELIVERY");
+      }
     }
   };
 
-  const handleProfileSubmit = (e: React.FormEvent) => {
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const digitsOnly = phone.replace(/\D/g, "");
     if (!name.trim() || digitsOnly.length < 10) {
@@ -215,7 +248,12 @@ export const CartSheet = () => {
       return;
     }
     localStorage.setItem("pizzaria_profile", JSON.stringify({ name, phone }));
-    setStep("DELIVERY");
+    const hasExisting = await checkExistingOrder(phone);
+    if (hasExisting) {
+      setStep("EXISTING_ORDER_WARNING");
+    } else {
+      setStep("DELIVERY");
+    }
   };
 
   const handleDeliverySubmit = (e: React.FormEvent) => {
@@ -314,6 +352,7 @@ export const CartSheet = () => {
                   else if (step === "DELIVERY") setStep("PROFILE");
                   else if (step === "PROFILE") setStep("CART");
                   else if (step === "SELECT_CRUST") setStep("CART");
+                  else if (step === "EXISTING_ORDER_WARNING") setStep("CART");
                 }}
                 className="p-1 hover:bg-white/10 rounded-full transition-colors"
               >
@@ -322,7 +361,7 @@ export const CartSheet = () => {
             )}
             <SheetTitle className="flex items-center gap-2 text-lg text-white">
               <ShoppingBag className="h-5 w-5 text-primary" />
-              {step === "CART" ? "Seu Carrinho" : step === "PROFILE" ? "Identificação" : step === "DELIVERY" ? "Entrega" : step === "WAITING_PAYMENT" ? "Pagamento PIX" : step === "SELECT_CRUST" ? "Borda Grátis" : "Pagamento"}
+              {step === "CART" ? "Seu Carrinho" : step === "PROFILE" ? "Identificação" : step === "DELIVERY" ? "Entrega" : step === "WAITING_PAYMENT" ? "Pagamento PIX" : step === "SELECT_CRUST" ? "Borda Grátis" : step === "EXISTING_ORDER_WARNING" ? "Aviso" : "Pagamento"}
             </SheetTitle>
           </div>
           <SheetDescription id="cart-description" className="sr-only">
@@ -375,18 +414,43 @@ export const CartSheet = () => {
             </p>
 
             <div className="flex flex-col gap-3 w-full mt-auto pt-6">
-              <Button onClick={() => {
+              <Button onClick={async () => {
                 setShowCrustReminder(false);
-                setStep("SELECT_CRUST");
-              }} size="lg" className="w-full rounded-full btn-glass-primary font-bold shadow-xl shadow-primary/20">
-                Escolher Borda
-              </Button>
-              <Button onClick={() => {
-                setShowCrustReminder(false);
-                if (!name || !phone) setStep("PROFILE");
-                else setStep("DELIVERY");
+                if (!name || !phone) {
+                  setStep("PROFILE");
+                } else {
+                  const hasExisting = await checkExistingOrder(phone);
+                  if (hasExisting) {
+                    setStep("EXISTING_ORDER_WARNING");
+                  } else {
+                    setStep("DELIVERY");
+                  }
+                }
               }} size="lg" variant="ghost" className="w-full rounded-full font-bold">
                 Continuar sem adicionar / Já adicionei
+              </Button>
+            </div>
+          </div>
+        ) : step === "EXISTING_ORDER_WARNING" ? (
+          <div className="flex flex-1 flex-col p-6 animate-fade-in items-center justify-center text-center">
+            <div className="bg-yellow-500/10 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+              <AlertTriangle className="h-8 w-8 text-yellow-500" />
+            </div>
+            <h3 className="text-2xl font-black mb-2">Você já fez um pedido hoje!</h3>
+            <p className="text-sm text-muted-foreground mb-6">
+              Notamos que você já realizou um pedido hoje às {existingOrder ? new Date(existingOrder.created_at).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}) : ''}.
+              <br/><br/>
+              <strong>Itens do pedido anterior:</strong>
+              <br/>
+              {existingOrder?.items?.map((item: any) => `${item.quantity}x ${item.product_name}`).join(', ')}
+            </p>
+
+            <div className="flex flex-col gap-3 w-full mt-auto pt-6">
+              <Button onClick={() => setStep("DELIVERY")} size="lg" className="w-full rounded-full btn-glass-primary font-bold shadow-xl shadow-primary/20">
+                Sim, quero fazer outro pedido
+              </Button>
+              <Button onClick={() => setIsOpen(false)} size="lg" variant="ghost" className="w-full rounded-full font-bold">
+                Cancelar
               </Button>
             </div>
           </div>

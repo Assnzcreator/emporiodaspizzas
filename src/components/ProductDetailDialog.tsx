@@ -66,16 +66,26 @@ export const ProductDetailDialog = ({ product, open, onOpenChange, dbProducts, c
       setSize("M");
       setQty(1);
       setNotes("");
-      if (product?.category === "promocao") {
-        const rules = PROMO_RULES[product.name] || PROMO_RULES['DEFAULT'];
-        setPromoSelections(new Array(rules.length).fill(""));
-      } else {
-        setPromoSelections([]);
-      }
       setIsHalf(false);
       setSecondFlavor("");
     }
   }, [open, product?.id]);
+
+  useEffect(() => {
+    if (open && product?.category === "promocao") {
+      const baseRules = PROMO_RULES[product.name] || PROMO_RULES['DEFAULT'];
+      const neededLength = baseRules.length * qty;
+      setPromoSelections(prev => {
+        if (prev.length === neededLength) return prev;
+        if (prev.length < neededLength) {
+          return [...prev, ...new Array(neededLength - prev.length).fill("")];
+        }
+        return prev.slice(0, neededLength);
+      });
+    } else if (open) {
+      setPromoSelections([]);
+    }
+  }, [qty, open, product]);
 
   if (!product) return null;
 
@@ -90,8 +100,9 @@ export const ProductDetailDialog = ({ product, open, onOpenChange, dbProducts, c
 
   const handleAdd = () => {
     if (product.category === "promocao") {
-      const rules = PROMO_RULES[product.name] || PROMO_RULES['DEFAULT'];
-      if (promoSelections.length !== rules.length || promoSelections.some(s => !s)) {
+      const baseRules = PROMO_RULES[product.name] || PROMO_RULES['DEFAULT'];
+      const neededLength = baseRules.length * qty;
+      if (promoSelections.length !== neededLength || promoSelections.some(s => !s)) {
         return toast.error("Selecione todos os sabores da promoção!");
       }
     }
@@ -100,7 +111,8 @@ export const ProductDetailDialog = ({ product, open, onOpenChange, dbProducts, c
     let customPrice: number | undefined = undefined;
     
     if (product.category === "promocao") {
-      const rules = PROMO_RULES[product.name] || PROMO_RULES['DEFAULT'];
+      const baseRules = PROMO_RULES[product.name] || PROMO_RULES['DEFAULT'];
+      const rules = Array(qty).fill(baseRules).flat();
       const flavorsText = promoSelections.map((s, idx) => `${idx + 1}. ${s} (${rules[idx].label})`).join("\n");
       finalNotes = `Sabores escolhidos:\n${flavorsText}\n${notes ? '\nObs: ' + notes : ''}`.trim();
     } else if (isPizza && isHalf) {
@@ -122,9 +134,10 @@ export const ProductDetailDialog = ({ product, open, onOpenChange, dbProducts, c
 
   const availableFlavors = dbProducts || [];
 
-  const currentPromoRules = product?.category === "promocao" 
+  const basePromoRules = product?.category === "promocao" 
     ? (PROMO_RULES[product.name] || PROMO_RULES['DEFAULT'])
     : [];
+  const currentPromoRules = Array(qty).fill(basePromoRules).flat();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[100dvh] sm:max-h-[90dvh] h-[100dvh] sm:h-auto overflow-hidden p-0 gap-0 border-white/5 bg-background shadow-2xl">
